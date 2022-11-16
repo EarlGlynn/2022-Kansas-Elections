@@ -1,0 +1,364 @@
+---
+title: "Dennis Pyle - 2022 Gubernatorial Spoiler Map"
+author: "Earl F Glynn<br>"
+date: "<small>`r Sys.Date()`</small>"
+output:
+  html_document:
+    theme: cerulean
+    toc: yes
+    toc_depth:  3
+    toc_float:
+      collapsed:  yes
+      smooth_scroll: yes
+    number_sections: yes
+    code_folding:  show
+---
+
+```{r setup, echo = FALSE}
+# http://biostat.mc.vanderbilt.edu/wiki/Main/KnitrHtmlTemplate
+require(Hmisc)    # provides knitrSet and other functions
+knitrSet(lang = 'markdown',   # If using blogdown: knitrSet(lang='blogdown')
+         fig.align = 'left',
+         w = 6.5,
+         h = 4.5,
+         cache = FALSE)
+```
+
+`r hidingTOC(buttonLabel = "Outline")`
+
+```{r startYourEngines, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  comment = NA)
+
+time.1 <- Sys.time()
+```
+
+# Setup {.tabset .tabset-fade .tabset-pills}
+
+## {.active}
+
+## Constants
+
+```{r}
+FILE_PREFIX <- "2022-11-General"                                           #####
+```
+
+```{r Constants}
+SOURCE <- "Kansas Secretary of State's Unofficial Election Results, Nov. 14, 2022 Final"   #####
+stamp  <- paste("watchdoglab.substack.com", format(Sys.time(), "%Y-%m-%d"))
+```
+
+```{r}
+EXCEL_LIMIT <- 2^20
+```
+
+## Packages
+
+```{r Packages}
+library(tidyverse)
+```
+
+Display formatting
+
+```{r Display}
+library(kableExtra)  # kable_styling
+#library(IRdisplay)   # display_html (needed in Jupyter notebooks)
+```
+
+I/O
+
+```{r IO}
+library(readxl)      # read_xlsx
+library(readr)       # write_csv
+library(writexl)     # write_xlsx
+```
+
+ Graphics
+
+```{r Graphics}
+library(scales)      # comma, comma_format
+```
+
+## ggplot theme
+
+[ggplot Themes Gallery](https://www.datanovia.com/en/blog/ggplot-themes-gallery/)
+
+```{r ggplotTheme}
+theme_set(theme_minimal() +
+
+          theme(axis.text             = element_text(size = 10),
+                axis.title            = element_text(size = 14),
+
+                plot.caption          = element_text(size = 10,
+                                                     hjust = c(0.0,1.0)),
+                plot.caption.position = "plot",   # R 4.0.0
+
+                plot.title.position   = "plot",
+                title                 = element_text(size = 14))
+           )
+
+COLOR_BAR     <- "skyblue"
+COLOR_OUTLINE <- "grey80"
+```
+
+## Helper functions
+
+```{r Helpers}
+Show <- function(data, caption="", bigMark="",
+                 height = NULL, width = NULL, ...)
+{
+  data                                       %>%
+  kable("html", caption=caption,
+        format.args=list(big.mark=bigMark))  %>%
+  kable_styling(bootstrap_options=c("striped", "bordered", "condensed"),
+                position="left",
+                full_width=FALSE, ...)       %>%
+  scroll_box(height = height, width = width) #  %>%
+# as.character()                             %>%      # Jupyter Only
+# display_html()                                      # Jupyter Only
+}
+```
+
+# Read 2022-11 Results
+
+Source is [2022 Kansas General Election Unoffical Results page](https://ent.sos.ks.gov/kssos_ent.html), Last and FINAL Update: 11/14/2022 6:18 PM
+
+Statewide results
+
+```{r}
+#                   Kelly   Schmidt  Cordell  Pyle
+statewideVotes <- c(492209, 471323,  10888,   20057)                               #####
+```
+
+```{r}
+PyleStatePercent <- round(100 * statewideVotes[4] / sum(statewideVotes), 2)
+PyleStatePercent
+```
+
+County results screen scraped from SOS site.
+
+```{r}
+results <- 
+  read_xlsx("../County-Results-ent.sos.ks.gov-2022-11-14-1818-FINAL.xlsx")  %>%    #####
+  filter(Contest == "Governor / Lt. Governor")  %>%
+  select(-Contest, -starts_with("State"), -CountyReport) %>%
+  separate(Candidate, c("Party", "CandidateName"), sep = "-")
+
+dim(results)
+```
+```{r}
+results %>% Show(height = "400px")
+```
+Let's compute total votes by county
+
+```{r}
+countyTotals <- 
+  results           %>%
+  group_by(County)  %>%
+  summarize(TotalVotes = sum(`County Votes`))  %>%
+  ungroup()
+
+dim(countyTotals)
+```
+
+Let's recompute candidate percentages for more precision
+
+```{r}
+results <- 
+  results                                  %>%
+  inner_join(countyTotals, by = "County")  %>%
+  mutate(Percent = round(100 * `County Votes` / TotalVotes, 2))
+
+
+results %>%  Show(height = "400px")
+```
+
+```{r}
+write_xlsx(results, paste0(FILE_PREFIX, "-Results-for-Gubernatorial-Candidates.xlsx"))
+```
+
+```{r}
+Pyle <- 
+  results                                %>% 
+  filter(CandidateName == "Dennis Pyle") %>%
+  select(County, `County Votes`, ColorIndex = `County %`,  Percent)
+
+dim(Pyle)
+```
+
+```{r}
+Pyle %>% Show(height = "400px")
+```
+
+Make sure SOS rounding (now ColorIndex) consistent with computed percentages
+
+```{r}
+all(round(Pyle$Percent) == Pyle$ColorIndex)
+```
+```{r}
+countyCounts <- 
+  as.data.frame( table(Pyle$ColorIndex) )  %>%
+  rename(PercentInterval = Var1)
+
+countyCounts %>%  Show()
+```
+
+```{r}
+sum(countyCounts$Freq)
+```
+
+
+```{r}
+write_xlsx(Pyle, paste0(FILE_PREFIX, "-County-Results-for-Pyle.xlsx"))
+```
+
+```{r}
+voteQuantiles <- quantile(Pyle$Percent,
+                          c(0.0, 0.05, 0.10, 0.25, 0.50,
+                             0.75, 0.90, 0.95, 1.0))
+voteQuantiles
+```
+
+# Density plot of Pyle's County Percentage
+
+```{r DensityPlot, fig.width = 8, fig.height = 6}
+ggplot(Pyle, aes(x = Percent, y=..density..))                       +
+geom_histogram(fill = "skyblue", color = "grey80")                  +
+geom_density()                                                      +
+scale_x_continuous(breaks = 0:10)                                   +
+labs(title =  "Density Plot of Dennis Pyle's County Percentages in Governor's Race",
+     subtitle = "Variation across the 105 Kansas Counties in Nov. 2022 General Election",
+     x = "Dennis Pyle's County Vote Percentage",
+     y = "Density",
+     caption = c(SOURCE, stamp))                                    +
+theme(axis.ticks.x       = element_line(),
+      panel.grid.minor.x = element_blank(),
+      panel.grid.minor.y = element_blank())
+```
+
+# Map Pyle Results
+
+```{r}
+library(maps)
+library(RColorBrewer) # brewer.pal
+```
+
+## Palette setup
+
+```{r}
+ brewer.pal.info["Greys",]  %>%  Show()
+```
+
+```{r, fig.height = 1}
+par(mar=c(1,1,1,1))
+display.brewer.pal(9,"Greys")
+```
+Set complementary background color for text
+
+```{r}
+color.map  <- brewer.pal(9, "Greys")
+color.text <- c(rep("black", 4), rep("white", 4), "yellow")
+```
+
+## Put data in FIPS order
+
+McPherson is first under M's in FIPS order
+
+```{r}
+CapWords <- function(s, strict = FALSE)
+{
+    cap <- function(s) paste(toupper(substring(s,1,1)),
+                  {s <- substring(s,2); if(strict) tolower(s) else s},
+                             sep = "", collapse = " " )
+    sapply(strsplit(s, split = " "), cap, USE.NAMES = !is.null(names(s)))
+}
+```
+
+```{r}
+county.abbr <- c(
+  "AL","AN","AT","BA","BT","BB","BR","BU","CS","CQ","CK","CN","CA","CY",
+  "CD","CF","CM","CL","CR","DC","DK","DP","DG","ED","EK","EL","EW","FI",
+  "FO","FR","GE","GO","GH","GT","GY","GL","GW","HM","HP","HV","HS","HG",
+  "JA","JF","JW","JO","KE","KM","KW","LB","LE","LV","LC","LN","LG","LY",
+  "MP","MN","MS","ME","MI","MC","MG","MR","MT","NM","NO","NS","NT","OS",
+  "OB","OT","PN","PL","PT","PR","RA","RN","RP","RC","RL","RO","RH","RS",
+  "SA","SC","SG","SW","SN","SD","SH","SM","SF","ST","SV","SU","TH","TR",
+  "WB","WA","WS","WH","WL","WO","WY")
+```
+
+```{r}
+m <- map('county', 'kansas', plot=FALSE)
+names(m)
+```
+
+```{r}
+countyNames <- tibble(County = CapWords(sub("kansas,","", m$names)))
+countyNames$County[57] <- "McPherson"   # Force this fix
+countyNames$County
+```
+
+```{r}
+Pyle <- 
+  countyNames  %>%
+  inner_join(Pyle, by = "County")
+
+Pyle$County
+```
+
+## Plot map
+
+```{r, fig.width = 10, fig.height = 7.5}
+layout(rbind(1,2), heights=c(9,1))
+
+par(mar=c(0,1,1,1))
+
+county.label <- paste(county.abbr, "\n", 
+                      sprintf("%.2f", Pyle$Percent), "%", sep="")
+
+m <- map('county', 'kansas', fill = TRUE, col = color.map[Pyle$ColorIndex])
+
+map.text("county", "kansas",
+  col = color.text[Pyle$ColorIndex],
+  labels = county.label, cex = 0.8, add = TRUE)
+
+mtext(expression(bold("Dennis Pyle Gubernatorial Voters [%]")), cex = 2)
+
+par(mar=c(2, 6, 0, 6))
+barplot(rep(1,length(color.map)), col=color.map, space=0.0, border="black", axes=FALSE)
+text(1:length(color.map) - 0.5, rep(0.5,length(color.map)),
+     paste0(1:9, "%"),
+     cex=1,
+     col=color.text)
+mtext(SOURCE, BOTTOM <- 1, adj = 0, line = 0.5, cex = 0.8, col = "blue")
+mtext(stamp,  BOTTOM,      adj=1,   line=0.5,   cex = 0.8, col = "blue")
+
+mtext(paste0("Statewide Dennis Pyle Voters: ",
+             sprintf("%.2f", PyleStatePercent), "%"),
+      TOP<-3, line = 1, cex = 2)
+```
+
+
+
+# Epilog {.tabset .tabset-fade .tabset-pills}
+
+## {.active}
+
+## Session Info
+
+```{r devtoolsSessionInfo}
+devtools::session_info()
+```
+
+</div>
+
+```{r epilogDeltaTime, echo=FALSE}
+time.2 <- Sys.time()
+processingTime <- paste("Processing time:", sprintf("%.1f",
+                        as.numeric(difftime(time.2,
+                                            time.1, units="secs"))), "secs\n")
+```
+
+`r processingTime`
+`r format(time.2, "%Y-%m-%d %H%M")`
+

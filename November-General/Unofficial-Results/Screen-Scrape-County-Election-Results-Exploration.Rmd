@@ -1,0 +1,477 @@
+---
+title: "Screen Scrape Kansas Unofficial Election Results -- County Pages -- Exploration"
+author: "Earl F Glynn<br>"
+date: "<small>`r Sys.Date()`</small>"
+output:
+  html_document:
+    theme: cerulean
+    toc: yes
+    toc_depth:  3
+    toc_float:
+      collapsed:  yes
+      smooth_scroll: yes
+    number_sections: yes
+    code_folding:  show
+---
+
+Starting point: https://ent.sos.ks.gov/kssos_ent.html
+
+Example county link (JoCo):  https://ent.sos.ks.gov/johnson.html
+
+Adapted from R scripts from 2010 and 2016 that scraped the 105 county pages and extracted election results.
+
+Now use local download to store all results locally:  `Fetch-SOS-Unofficial-Results.bat`
+
+`wget -e robots=off -N -t 50 -o wget.log -l 8 -r "https://ent.sos.ks.gov/kssos_ent.html"`   
+
+Results stored in directory:
+
+    ent.sos.ks.gov
+    ent.sos.ks.gov/images
+    
+Files:
+
+* `constitutional.html`
+
+* `daysAfterElection.html`
+
+* `favorite-races.html`
+
+* `judicial.html`
+
+* `ks-boe.html`
+
+* `ks-senate.html`
+
+* `kssos_ent.html`
+
+* `Uncontested.html`
+
+* For each county:  county.html 
+
+
+```{r setup, echo = FALSE}
+# http://biostat.mc.vanderbilt.edu/wiki/Main/KnitrHtmlTemplate
+require(Hmisc)    # provides knitrSet and other functions
+knitrSet(lang = 'markdown',   # If using blogdown: knitrSet(lang='blogdown')
+         fig.align = 'left',
+         w = 6.5,
+         h = 4.5,
+         cache = FALSE)
+```
+
+`r hidingTOC(buttonLabel = "Outline")`
+
+```{r startYourEngines, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  comment = NA)
+
+time.1 <- Sys.time()
+```
+
+# Setup {.tabset .tabset-fade .tabset-pills}
+
+## {.active}
+
+## Constants
+
+```{r}
+KansasCounties <- c(      # Names of 105 Kansas counties
+  "Allen",      "Anderson",     "Atchison",    "Barber",    "Barton",
+  "Bourbon",    "Brown",        "Butler",      "Chase",     "Chautauqua",
+  "Cherokee",   "Cheyenne",     "Clark",       "Clay",      "Cloud",
+  "Coffey",     "Comanche",     "Cowley",      "Crawford",  "Decatur",
+  "Dickinson",  "Doniphan",     "Douglas",     "Edwards",   "Elk",
+  "Ellis",      "Ellsworth",    "Finney",      "Ford",      "Franklin",
+  "Geary",      "Gove",         "Graham",      "Grant",     "Gray",
+  "Greeley",    "Greenwood",    "Hamilton",    "Harper",    "Harvey",
+  "Haskell",    "Hodgeman",     "Jackson",     "Jefferson", "Jewell",
+  "Johnson",    "Kearny",       "Kingman",     "Kiowa",     "Labette",
+  "Lane",       "Leavenworth",  "Lincoln",     "Linn",      "Logan",
+  "Lyon",       "Marion",       "Marshall",    "McPherson", "Meade",
+  "Miami",      "Mitchell",     "Montgomery",  "Morris",    "Morton",
+  "Nemaha",     "Neosho",       "Ness",        "Norton",    "Osage",
+  "Osborne",    "Ottawa",       "Pawnee",      "Phillips",  "Pottawatomie",
+  "Pratt",      "Rawlins",      "Reno",        "Republic",  "Rice",
+  "Riley",      "Rooks",        "Rush",        "Russell",   "Saline",
+  "Scott",      "Sedgwick",     "Seward",      "Shawnee",   "Sheridan",
+  "Sherman",    "Smith",        "Stafford",    "Stanton",   "Stevens",
+  "Sumner",     "Thomas",       "Trego",       "Wabaunsee", "Wallace",
+  "Washington", "Wichita",      "Wilson",      "Woodson",   "Wyandotte")
+```
+                                                                                   
+
+## Packages
+
+```{r Packages}
+library(tidyverse)
+library(lubridate)
+```
+
+Display formatting
+
+```{r Display}
+library(kableExtra)  # kable_styling
+#library(IRdisplay)   # display_html (needed in Jupyter notebooks)
+```
+
+I/O
+
+```{r IO}
+library(readxl)      # read_xlsx
+library(readr)       # write_csv
+library(writexl)     # write_xlsx
+```
+
+Scraping
+
+```{r Scraping}
+library(rvest)       # scraping
+```
+
+
+## Helper functions
+
+```{r Helpers}
+Show <- function(data, caption="", bigMark="",
+                 height = NULL, width = NULL, ...)
+{
+  data                                       %>%
+  kable("html", caption=caption,
+        format.args=list(big.mark=bigMark))  %>%
+  kable_styling(bootstrap_options=c("striped", "bordered", "condensed"),
+                position="left",
+                full_width=FALSE, ...)       %>%
+  scroll_box(height = height, width = width) #  %>%
+# as.character()                             %>%      # Jupyter Only
+# display_html()                                      # Jupyter Only
+}
+```
+
+# Exploration
+
+```{r}
+BASE <- "ent.sos.ks.gov-2022-11-14-1818-FINAL"                             #####
+```
+
+## Explore County
+
+```{r}
+  i <- 1
+  county <- KansasCounties[i]
+  filename <- paste0(BASE, "/", county, ".html")
+  filename
+```
+
+```{r}
+webPage <- read_html(filename)
+```
+
+```{r}
+countyName <- 
+  webPage                     %>%
+  html_nodes("div.col-md-8")  %>%
+  html_text()                 %>%
+  str_trim()
+
+countyName
+```
+```{r}
+countyName <- (str_split(countyName, " ") %>% unlist())[3]
+countyName
+```
+
+## Last Update
+
+```{r}
+updateTimes <-
+  webPage                     %>%
+  html_nodes("div.col-md-4")  %>%
+  html_nodes("p")             %>%
+  html_text()                 %>%
+  str_trim()
+
+updateTimes
+```
+
+```{r}
+updateTimes <- str_sub(updateTimes, 2+str_locate(updateTimes, ":")[,1], str_length(updateTimes))
+updateTimes
+```
+Use ISO 8601 format
+
+```{r}
+updateTimes <- parse_date_time(updateTimes, "%m/%d%y %H:%M Op") %>% str_sub(1, -4)
+updateTimes
+```
+
+## Races
+
+```{r}
+races <- 
+  webPage   %>%
+  #html_nodes(xpath = "//div[@class = 'race']")   # XPath
+  html_nodes("div.race")                          # CSS selector
+
+length(races)
+```
+
+```{r}
+races %>%
+  html_nodes("h3")  %>%
+  html_text()  
+```
+
+```{r}
+index <- 3
+```
+
+
+```{r}
+contest <- 
+  races [[index]]  %>% 
+    html_nodes("div.race-heading")  %>%
+    html_nodes("h3")  %>%
+    html_text()
+
+contest
+```
+
+```{r}
+reporting <- 
+  races [[index]]  %>% 
+    html_nodes("div.race-subheading")  %>%
+    html_nodes("div.col-4")            %>%
+    html_nodes("p")  %>%
+    html_text()
+
+reporting 
+```
+
+```{r}
+precincts <- (str_split(reporting, ":") %>% unlist()  %>% str_trim)[2]
+precincts
+```
+
+```{r}
+races [[index]]  %>% 
+  html_nodes("div.race-subheading")  %>%
+  html_nodes("div.col-2")            %>%
+  html_nodes("p")  %>%
+  html_text
+```
+
+```{r}
+tableHeader <-
+  races [[index]]  %>% 
+    html_nodes("div.race-subheading")  %>%
+    html_nodes("p")  %>%
+    html_text()
+
+tableHeader
+```
+
+```{r}
+candidates <- 
+  races [[index]]                       %>% 
+  html_nodes("div.race-candidate-list") %>%
+  html_nodes("div.row")                
+
+candidates
+```
+
+```{r}
+candidateNames <- 
+  candidates                 %>%
+    html_nodes("div.col-4")  %>%
+    html_text()              %>%
+    str_trim()
+
+candidateNames
+```
+
+```{r}
+results <- 
+  candidates                   %>%
+    html_nodes("div.col-2")    %>%
+    html_text()                %>%
+    str_trim()                 %>%
+    str_replace_all(",|%", "") %>%  # numbers not strings
+    as.numeric()               %>%
+    matrix(nrow = length(candidateNames), 
+           byrow = TRUE,
+           dimnames = list(1:length(candidateNames),
+                           tableHeader[-1]))
+
+results %>% Show()
+```
+
+```{r}
+results <- bind_cols(County = countyName,
+                      Contest   = contest,
+                      Candidate = candidateNames,
+                      Precincts = precincts,
+                      results,
+                      CountyReport = updateTimes[2],
+                      StateReport  = updateTimes[1])
+
+results %>% Show()
+```
+
+```{r}
+# Scraping Functions
+
+ExtractContest <- function(countyName, updateTimes, races, index)
+{
+    contest <-
+    races [[index]]  %>%
+      html_nodes("div.race-heading")  %>%
+      html_nodes("h3")  %>%
+      html_text()
+
+  reporting <-
+    races [[index]]  %>%
+      html_nodes("div.race-subheading")  %>%
+      html_nodes("div.col-4")            %>%
+      html_nodes("p")  %>%
+      html_text()
+
+  precincts <- (str_split(reporting, ":") %>% unlist()  %>% str_trim)[2]
+
+  tableHeader <-
+    races [[index]]  %>%
+      html_nodes("div.race-subheading")  %>%
+      html_nodes("p")  %>%
+      html_text()
+
+  candidates <-
+    races [[index]]                       %>%
+    html_nodes("div.race-candidate-list") %>%
+    html_nodes("div.row")
+
+  candidateNames <-
+    candidates                 %>%
+      html_nodes("div.col-4")  %>%
+      html_text()              %>%
+      str_trim()
+
+  results <-
+    candidates                   %>%
+      html_nodes("div.col-2")    %>%
+      html_text()                %>%
+      str_trim()                 %>%
+      str_replace_all(",|%", "") %>%  # numbers not strings
+      as.numeric()               %>%
+      matrix(nrow = length(candidateNames),
+             byrow = TRUE,
+             dimnames = list(1:length(candidateNames),
+                             tableHeader[-1]))
+
+  contestResults <- bind_cols(County = countyName,
+                              Contest   = contest,
+                              Candidate = candidateNames,
+                              Precincts = precincts,
+                              results,
+                              CountyReport = updateTimes[2],
+                              StateReport  = updateTimes[1])
+
+  return(contestResults)
+}
+
+
+ExtractCounty <- function(BASE, county)
+{
+  # County filename
+
+  filename <- paste0(BASE, "/", county, ".html")
+  webPage <- read_html(filename)
+
+  # Extracted county name
+  countyName <-
+    webPage                     %>%
+    html_nodes("div.col-md-8")  %>%
+    html_text()                 %>%
+    str_trim()
+
+  countyName <- (str_split(countyName, " ") %>% unlist())[3]
+
+  # Update Times
+  updateTimes <-
+    webPage                     %>%
+    html_nodes("div.col-md-4")  %>%
+    html_nodes("p")             %>%
+    html_text()                 %>%
+    str_trim()
+
+  updateTimes <- str_sub(updateTimes,
+                         2 + str_locate(updateTimes, ":")[,1],
+                         str_length(updateTimes))
+  updateTimes <-
+    parse_date_time(updateTimes,"%m/%d%y %H:%M Op") %>%  # ISO 8601
+    str_sub(1, -4)
+
+  ## Races
+  races <-
+    webPage   %>%
+    #html_nodes(xpath = "//div[@class = 'race']")   # XPath
+    html_nodes("div.race")                          # CSS selector
+
+  races %>%
+    html_nodes("h3")  %>%
+    html_text()
+
+  countySummary <- NULL
+  for (index in 1:length(races))
+  {
+    contestResults <- ExtractContest(countyName, updateTimes, races, index)
+    countySummary <- bind_rows(countySummary, contestResults)
+  }
+
+  return(countySummary)
+}
+```
+
+```{r}
+# Process Counties
+
+stateSummary <- NULL
+
+for (i in 1:length(KansasCounties))
+{
+  cat(i, KansasCounties[i], "\n")
+  countySummary <- ExtractCounty(BASE, KansasCounties[i])
+  
+  stateSummary <- bind_rows(stateSummary,
+                            countySummary)
+}
+
+nrow(stateSummary)
+```
+
+```{r}
+write_xlsx(stateSummary, paste0("County-Results-", BASE, ".xlsx"))
+```
+
+# Epilog {.tabset .tabset-fade .tabset-pills}
+
+## {.active}
+
+## Session Info
+
+```{r devtoolsSessionInfo}
+devtools::session_info()
+```
+
+</div>
+
+```{r epilogDeltaTime, echo=FALSE}
+time.2 <- Sys.time()
+processingTime <- paste("Processing time:", sprintf("%.1f",
+                        as.numeric(difftime(time.2,
+                                            time.1, units="secs"))), "secs\n")
+```
+
+`r processingTime`
+`r format(time.2, "%Y-%m-%d %H%M")`
+

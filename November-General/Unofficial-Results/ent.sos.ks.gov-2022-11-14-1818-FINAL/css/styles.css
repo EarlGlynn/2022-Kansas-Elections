@@ -1,0 +1,963 @@
+﻿@charset "utf-8";
+
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;800;900&display=swap');
+
+body {
+	font-family: 'Open Sans', sans-serif;
+}
+
+p {
+	margin: 0;
+	font-family: 'Open Sans', sans-serif;
+}
+
+hr { 
+	margin: 2px 0 2px 0;
+	border: 1px solid black;
+	color: #000000;
+}
+
+.header-wrapper {
+	background-color: #081d33;
+}
+
+.header-wrapper img {
+	width: 100%;
+    
+}
+
+#mobile-banner {
+    display: none;
+}
+
+#lblMyFavoritesChecked {
+    padding: 0px;
+    margin:0px;
+    border:none;
+}
+
+.tab-wrapper {
+    background-color: #081d33;
+     /*height: 45px;*/
+}
+
+#mobile-nav {
+    /*display: none;*/
+}
+
+.navbar {
+    padding: 0;
+    font-size: 1.0em;
+    font-family: 'Playfair Display', serif;
+}
+
+.navbar-nav {
+    flex: 1;
+    margin: auto !important;
+    display: flex;
+    justify-content: space-between;
+}
+
+.navbar-toggler {
+    font-size: 0.9em;
+}
+
+
+.disclaimer-header { font-size: 1.1em; font-weight:700; text-decoration: underline; padding-top: 20px; padding-left: 0px; text-align: center; }
+.navbar-dark .navbar-nav .nav-link {
+    color: #ffffff;
+}
+
+.navbar-dark .navbar-nav .nav-link.active {
+    color: #002b4c;
+    background-color: #66a5da;
+}
+
+.navbar-dark .navbar-toggler {
+    color: rgba(255,255,255, 0.7);
+    border-color: rgba(255,255,255,0.7);
+}
+
+.navbar-dark .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3e%3cpath stroke='rgba(255, 255, 255, 0.7)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+.navbar-expand-md .navbar-nav .nav-link {
+    padding: 8px 15px 8px 15px;
+}
+
+.dropdown-menu {
+    background-color: #002442;
+}
+
+.dropdown-menu .dropdown-item:hover {
+    background-color: #66a5da;
+}
+
+.party-menu img {
+    height: 50px;
+    width: 50px;
+    padding-right: 10px;
+}
+/*.nav-tabs {
+    border: none;
+}
+
+
+.nav-tabs .nav-link {
+    border-radius: 0;
+    border: none;
+}
+
+
+.nav-tabs .nav-link.active {
+    background-color: #66a5da;
+    border: none;
+    color: #002b4c;
+}
+
+
+.nav-tabs .nav-item {
+    margin-bottom: 0;
+}
+
+.nav-link {
+    padding: 10px 18px 10px 18px;
+}
+
+
+.nav-link:hover {
+    border: none;
+}
+
+
+.tab-content .tab-pane.active {
+    border: none;
+}*/
+
+.nav-item a {
+    color: #ffffff;
+    font-size: 1.0em;;
+    font-weight: 600;
+}
+
+.heading-wrapper {
+    padding-top: 6px;
+    padding-bottom: 6px;
+    background: #001629;
+    border-top: 2px solid #66a5da;
+    border-bottom: 4px solid #66a5da;
+}
+
+.content-wrapper {
+    background-image: url("../ks_images/sosseal-gray.svg");
+    background-attachment: fixed;
+    background-size: 275% 275%;
+    background-position: 50% 25%;
+}
+
+.show-hide-map {
+    text-align: center;
+    padding-top: 4px;
+}
+
+.show-hide-map h4 {
+    font-size: 0.8em;
+    margin-bottom: 0;
+}
+
+.show-hide-map a {
+    color: #000000;
+    font-weight: 600;
+}
+
+.tab-heading h1, .county-heading h1 {
+    font-size: 1.7em;
+    font-weight: 700;
+    margin-bottom: 0;
+    color: #ffffff;
+    text-transform: uppercase;
+    font-family: 'Playfair Display', serif;
+}
+
+.tab-heading img, .county-heading img{
+    height: 30px;
+    width: 45px;
+    padding-right: 15px;
+}
+.county {
+    
+    font-weight: bold;
+    color: #000000;
+}
+
+.CountyResultsHover {
+	font-size: 12px;
+	
+}
+.view-disclaimer {
+    width: 100%;
+    text-align: center;
+    padding: 10px 0px 0px 0px;
+}
+
+.time-updated {
+	color: #ffffff;
+    text-align: right;
+    /*padding-top: 10px;*/
+    margin-bottom: 0;
+    font-size: 0.8em;
+}
+
+.results-county {
+    width: 100%;
+    text-align: center;
+    padding: 10px 0px 0px 0px;
+}
+
+.results-county select {
+	width: 46%;
+	height: 25px;
+}
+
+.map {
+	padding: 9px 0px 0px 0px;
+}
+
+.map h1 {
+	font-size: 1.5em;
+	text-align: center;
+    font-weight: 600;
+    font-family: 'Playfair Display', serif;
+}
+
+.map p {
+	padding-bottom: 7px;
+	text-align: center;
+    font-size: 0.9em;
+}
+
+.map-image {
+	text-align: center;
+}
+
+.map-image img {
+	width: 498px;
+}
+
+.map-legend {
+	text-align: center;
+    padding-top: 7px;
+}
+
+.map-legend table {
+    text-align: left;
+}
+
+.map-legend td {
+    padding-right: 15px;
+    padding-bottom: 5px;
+    font-weight: 600;
+    font-size: 0.85em;
+}
+
+.map .box {
+	height: 14px;
+	width: 14px;
+	border: 1px solid #373737;
+	padding: 0px 8px 0px 8px;
+	margin-right: 7px;	
+}
+
+.race-details .box {
+	height: 14px;
+	width: 14px;
+	border: 1px solid #373737;
+	padding: 0px 8px 0px 8px;
+    background-color: #ffffff;
+}
+
+.map .results-reporting {
+	background-color: #c0c0c0;
+}
+
+.map .results-complete {
+	background-color: #333333;
+}
+
+.my-races-map {
+    display: none;
+}
+.county-race-list {
+    padding-top: 30px;
+}
+
+.county-race-list h2{
+    padding-top: 50px;
+    margin-bottom: 0px;
+}
+
+h2.first-heading {
+    padding-top: 0px;
+}
+
+.subheading {
+    padding-top: 30px;
+}
+
+.filter-races {
+    display: none;
+    font-size: 0.8em;
+}
+
+.filter-races img {
+    width: 45px;
+    height: 45px;
+}
+
+.filter-races a {
+    color: #000000;
+}
+
+.filter-races .nav-link {
+    padding: 0;
+}
+
+.filter-races-vertical {
+    padding: 10px 0px 10px 0px;
+    background-color: #002442;
+    width: 115px;
+    position: relative;
+    float: right;
+    top: 75px;
+    text-align: center;
+    border-radius: 5px;
+}
+
+.filter-races-vertical p {
+    font-size: 1em;
+    color: #ffffff;
+}
+
+.filter-races-vertical a {
+    color: #ffffff;
+    font-size: 0.85em;
+    font-weight: 400;
+}
+
+.filter-races-vertical img {
+    width: 50px;
+    height: 50px;
+}
+
+.filter-races-vertical .nav-link {
+    padding: 5px 0px 5px 0px;
+}
+
+.splits {
+    padding-top: 25px;
+    padding-bottom: 15px;
+    text-align: center;
+}
+
+.splits h3 {
+    font-size: 1.5em;
+    font-family: 'Playfair Display', serif;
+    margin-bottom: 0px;
+}
+
+.splits p {
+    padding-bottom: 5px;
+    font-size: 0.9em;
+    font-weight: 600;
+    text-align: center;
+}
+
+.splits .progress {
+    height: 30px;
+    font-size: 1em;
+}
+
+.splits .progress .democrat-pbar {
+    background-color: #000099;
+}
+
+.splits .progress .republican-pbar {
+    background-color: #CC0000;
+}
+
+.splits .progress .noresults-pbar {
+    background-color: #c0c0c0;
+    color: black;
+}
+
+.splits .splits-legend {
+	text-align: center;
+    padding-top: 7px;
+    margin-top: 10px;
+}
+
+.splits .splits-legend table {
+    text-align: left;
+}
+
+.splits .splits-legend td {
+    padding-right: 15px;
+    padding-bottom: 5px;
+    font-weight: 600;
+    font-size: 0.85em;
+}
+
+.splits .box {
+	height: 14px;
+	width: 14px;
+	border: 1px solid #373737;
+	padding: 0px 8px 0px 8px;
+	margin-right: 7px;	
+}
+
+.race {
+    background-color: #efefef;
+    border: 1px solid #000000;
+    border-radius: 5px;
+    margin-top: 20px;
+    
+}
+
+.race-heading {
+	background-color: #002442;
+	border-radius: 3px 3px 0px 0px;
+	padding: 7px 0px 1px 0px;
+}
+
+.race-heading-dem {
+	background-color: #000099;
+	border-radius: 3px 3px 0px 0px;
+	padding: 7px 0px 1px 0px;
+}
+
+.race-heading-rep {
+	background-color: #CC0000;
+	border-radius: 3px 3px 0px 0px;
+	padding: 7px 0px 1px 0px;
+}
+
+.race-heading h3, .race-heading-dem h3, .race-heading-rep h3 {
+	color: #ffffff;
+	font-size: 1.5em;
+    font-weight: 500;
+    font-family: 'Playfair Display', serif;
+}
+
+.race-heading p, .race-heading-dem p, .race-heading-rep p {
+	color: #ffffff;
+    font-size: 0.75em;
+    padding-top: 5px;
+}
+
+.race-heading img, .race-heading-dem img, .race-heading-rep img {
+    width: 25px;
+}
+
+.favorite-race {
+	text-align: left;
+}
+
+.race-subheading {
+    background-color: #d6dbdf;
+    padding: 5px 0px 5px 0px;
+    font-size: 1em;
+    font-weight: 600;
+}
+
+.view-details {
+    /*text-align: right;*/
+    text-align: center;
+    padding: 3px 0px 3px 0px;
+    display: inline;
+}
+
+.view-details img {
+    width: 65px;
+    margin-right: 5px;
+    display: inline;
+}
+
+.view-details a {
+    font-size: 0.8em;
+    font-weight: bold;
+    color: #000000;
+    line-height: 1em;
+    display: inline;
+}
+
+.view-details a:hover {
+    text-decoration: underline;
+}
+
+.race-candidate-list p {
+    font-weight: 600;
+    padding: 5px 0px 5px 0px;
+}
+
+.race-candidate-list table {
+    margin: 5px 0px 5px 0px;
+}
+
+.race-legend {
+    background-color: #efefef;
+    border: 1px solid #000000;
+    border-radius: 5px;
+    margin-top: 8px;
+    width: 44%;
+    margin-right: auto;
+    margin-left: auto;
+    
+}
+
+.race-legend-subheading {
+    background-color: #d6dbdf;
+    padding: 2px 0px 1px 0px;
+    font-size: .8em;
+    font-weight: 700;
+    border-radius: 5px 5px 0px 0px;
+}
+
+.race-legend-candidate-list {
+    border-radius: 0px 0px 5px 5px;
+}
+
+.race-legend-candidate-list p {
+    font-weight: 600;
+    font-size: .8em;
+    padding: 2px 0px 2px 0px;
+}
+
+.center-image {
+    text-align: center;
+}
+
+.race-legend-color {
+    height: 14px;
+    width: 14px;
+}
+
+
+
+.spacer {
+    border-bottom: 1px solid #dcdcdc;
+}
+
+.spacer-bold {
+    border-bottom: 2px solid black;
+}
+
+.race-details {
+    padding: 10px 0px 10px 0px;
+    margin: 0px -15px 0px -15px;
+    background-color: #ffffff;
+    
+}
+
+.back-to-top {
+    text-align: right;
+    font-size: 0.7em;
+    font-weight: 600;
+    padding: 5px 15px 5px 0px;
+}
+
+.back-to-top a {
+    color: #000000;
+}
+
+.back-to-top a:hover {
+    text-decoration: none;
+}
+
+.no-races {
+    text-align: center;
+    padding: 60px 0px 100px 0px;
+}
+
+.no-races p {
+    padding-top: 15px;
+    color: rgba(0,0,0,1.0);
+font-weight: 600;
+}
+
+.Independent {
+	background-color: #047D13;
+}
+
+.Independent-winning {
+    background-color: #8afc8d;
+}
+
+.Democrat {
+	background-color: #000099;
+}
+
+.Democrat-winning {
+    background-color: #99d1f6;
+}
+
+.Libertarian {
+	background-color: #5C0678;
+}
+
+.Libertarian-winning {
+    background-color: #da80fc;
+}
+
+.Republican {
+	background-color: #CC0000;
+}
+
+.NoResults {
+	background-color: #c0c0c0;
+}
+
+.Republican-winning {
+    background-color: #ff9899;
+}
+
+.Yes {
+	background-color: #00C8C8;
+}
+
+.No {
+	background-color: #660000;
+}
+
+.disclaimer {
+	font-size: 0.85em;
+	padding: 40px 0px 50px 0px;
+}
+
+.disclaimer p {
+ 	font-weight: 700;
+	padding-bottom: 5px;
+}
+
+.disclaimer ol {
+	margin: 0;
+	padding-left: 12px;
+}
+
+.footer-wrapper {
+	background-color: #001629;
+}
+
+.footer-wrapper p {
+	text-align: center;
+	font-size: 1.3em;
+	color: #ffffff;
+	padding: 25px 0px 25px 0px;
+}
+
+/* Hide the browser's default checkbox */
+    .container input {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+        height: 0;
+        width: 0;
+    }
+
+/* Create a custom checkbox */
+.checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+ background-image: url("../ks_images/favorite-white.svg");
+    height: 25px;
+        width: 25px;
+    /*background-color: #eee;
+    border: #66A5DA solid;
+    border-width: 2px;*/
+}
+
+/* On mouse-over, add a grey background color */
+.container:hover input ~ .checkmark {
+    /*background-color: #ccc;*/
+    background-image: url("../ks_images/favorite-white.svg");
+}
+
+/* When the checkbox is checked, add a blue background */
+.container input:checked ~ .checkmark {
+    background-image: url("../ks_images/favorite-yellow.svg");
+}
+
+/* Create the checkmark/indicator (hidden when not checked) */
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+/* Show the checkmark when checked */
+.container input:checked ~ .checkmark:after {
+    display: block;
+}
+
+/* Style the checkmark/indicator */
+.container .checkmark:after {
+    left: 0px;
+    top: 0px;
+    width: 25px;
+    height: 25px;
+    background-image: url("../ks_images/favorite-yellow.svg");
+    /*border: solid white;
+    border-width: 0 3px 3px 0;
+    -webkit-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);*/
+}
+
+@media (max-width: 1200px) {
+.race-legend {
+    width: 54%;    
+}
+}
+
+@media (max-width: 992px) {
+.tab-wrapper {
+    /*height: 42px;*/
+}
+
+.nav-link {
+    padding: 12px 8px 11px 8px;
+}
+
+.navbar-expand-md .navbar-nav .nav-link {
+    padding: 12px 8px 12px 8px;
+}
+
+.nav-item a {
+    font-size: 0.8em;
+}
+
+.tab-heading h1, .county-heading h1 {
+    font-size: 1.8em;
+}
+
+.time-updated {
+    text-align: left;
+    padding-top: 10px;
+}
+
+.race-legend {
+    width: 72%;    
+}
+
+}
+@media (max-width: 800px) {
+
+.map {
+    
+padding-left: 90px;
+
+}
+}
+
+@media (max-width: 767px) {
+#desktop-banner {
+    display: none;
+}
+
+
+#mobile-banner {
+    display: block;
+}
+
+#tab-menu {
+    display: none;
+}
+
+#mobile-nav {
+    display: block;
+}
+
+.navbar {
+    padding: 10px 0px 10px 0px;
+}
+
+.navbar-expand-md .navbar-nav .nav-link {
+    padding: 8px;
+}
+
+.nav-item a {
+    font-size: 1em;
+}
+
+.tab-heading h1 {
+    font-size: 1.8em;
+}
+
+.time-updated {
+    padding-top: 0px;
+}
+
+.map h1 {
+	font-size: 1.7em;
+	text-align: center;
+}
+
+.map p {
+    font-size: 0.9em;
+}
+
+.race-subheading {
+    font-size: 0.75em;
+}
+
+.race-heading h3 {
+    font-size: 1.3em;
+}
+
+.map {
+    padding-left: 0px;
+}
+.results-county {
+    padding-bottom: 10px;
+}
+.results-county select {
+	width: 100%;
+}
+.filter-races {
+    display: block;
+    font-size: 0.9em;
+}
+
+.filter-races-vertical {
+    display: none;
+}
+.race-legend {
+    width: 80%;
+}
+
+}
+
+@media (max-width: 576px) {
+.map h1 {
+	font-size: 1.4em;
+}
+
+.map p {
+    font-size: 0.8em;
+}
+
+.tab-heading h1, .county-heading h1 {
+    font-size: 1.4em;
+}
+
+.race-subheading p {
+    font-size: 0.85em;
+}
+
+.race-candidate-list p {
+    font-size: 0.85em;
+    padding: 2px 0px 2px 0px;
+}
+
+.race-candidate-list table {
+    margin: 2px 0px 2px 0px;
+}
+
+.race-candidate-list td {
+    height: 10px;
+}
+h2.subheading {
+    font-size: 1.7em;
+}
+
+.map-legend table td {
+    font-size: 0.75em;
+}
+
+.race-heading img, .race-heading-dem img, .race-heading-rep img {
+    width: 20px;
+
+}
+
+.race-heading h3, .race-heading-dem h3, .race-heading-rep h3 {
+    font-size: 1.2em;
+}
+
+.race-legend {
+    width: 95%;    
+}
+}
+
+@media (max-width: 469px) {
+.tab-heading h1, .county-heading h1 {
+    font-size: 1.3em;
+}
+
+.tab-heading img, .county-heading img{
+    height: 30px;
+    width: 40px;
+    padding-right: 10px;
+}
+
+.race-candidate-list {
+    font-size: 0.8em;
+}
+
+.race-heading h3, .race-heading-dem h3, .race-heading-rep h3 {
+    font-size: 1em;
+}
+
+.race .col-11, .race .col-6, .race .col-3, .race .col-2, .race .col-1 {
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.view-details a {
+    font-size: 0.7em;
+}
+
+.map-legend table td {
+    font-size: 0.65em;
+}
+.race-legend-subheading {
+    font-size: .7em;
+}
+
+.race-legend-candidate-list p {
+    font-size: .7em;
+}
+}
+
+@media (max-width: 405px) {
+.race-heading h3 {
+    font-size: 0.95em;
+}
+
+.map-legend table td {
+    font-size: 0.5em;
+}
+
+.map h1 {
+    font-size: 1.05em;
+}
+
+.map p {
+    font-size: 0.75em;
+}
+
+.tab-heading h1, .county-heading h1 {
+    font-size: 1.05em;
+}
+
+.tab-heading img, .county-heading img{
+    height: 20px;
+    width: 20px;
+    padding-right: 5px;
+}
+
+.view-details img {
+    width: 40px;
+}
+}
