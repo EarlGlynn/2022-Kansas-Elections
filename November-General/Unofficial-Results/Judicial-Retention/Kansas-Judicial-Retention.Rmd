@@ -1,0 +1,309 @@
+---
+title: "Kansas Judicial Retention Election"
+author: "Earl F Glynn<br><small>watchdoglab.substack.com</small>"    
+date: "<small>`r Sys.Date()`</small>"
+output:
+  html_document:
+    theme: cerulean
+    toc: yes
+    toc_depth:  3
+    toc_float:
+      collapsed:  yes
+      smooth_scroll: yes
+    number_sections: yes
+    code_folding:  show
+---
+
+Create this notebook from 2010/2016 scripts.
+
+```{r setup, echo = FALSE}
+# http://biostat.mc.vanderbilt.edu/wiki/Main/KnitrHtmlTemplate
+require(Hmisc)    # provides knitrSet and other functions
+knitrSet(lang = 'markdown',   # If using blogdown: knitrSet(lang='blogdown')
+         fig.align = 'left',
+         w = 6.5,
+         h = 4.5,
+         cache = FALSE)
+```
+
+`r hidingTOC(buttonLabel = "Outline")`
+
+```{r startYourEngines, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  comment = NA)
+
+time.1 <- Sys.time()
+```
+
+# Setup {.tabset .tabset-fade .tabset-pills}
+
+## {.active}
+
+## Constants
+
+```{r Constants}
+FILE_PREFIX   <- "2022-11-General"    # no spaces
+```
+
+```{r}
+EXCEL_LIMIT <- 2^20
+```
+
+```{r}
+county.abbr <- c(
+  "AL","AN","AT","BA","BT","BB","BR","BU","CS","CQ","CK","CN","CA","CY",
+  "CD","CF","CM","CL","CR","DC","DK","DP","DG","ED","EK","EL","EW","FI",
+  "FO","FR","GE","GO","GH","GT","GY","GL","GW","HM","HP","HV","HS","HG",
+  "JA","JF","JW","JO","KE","KM","KW","LB","LE","LV","LC","LN","LG","LY",
+  "MP","MN","MS","ME","MI","MC","MG","MR","MT","NM","NO","NS","NT","OS",
+  "OB","OT","PN","PL","PT","PR","RA","RN","RP","RC","RL","RO","RH","RS",
+  "SA","SC","SG","SW","SN","SD","SH","SM","SF","ST","SV","SU","TH","TR",
+  "WB","WA","WS","WH","WL","WO","WY")          
+```
+
+## Packages
+
+```{r Packages}
+library(tidyverse)
+```
+
+Display formatting
+
+```{r Display}
+library(kableExtra)  # kable_styling
+#library(IRdisplay)   # display_html (needed in Jupyter notebooks)
+```
+
+I/O
+
+```{r IO}
+library(readxl)      # read_xlsx
+library(readr)       # write_csv
+library(writexl)     # write_xlsx
+```
+
+ Graphics
+
+```{r Graphics}
+library(maps)
+```
+
+## Helper functions
+
+```{r Helpers}
+Show <- function(data, caption="", bigMark="",
+                 height = NULL, width = NULL, ...)
+{
+  data                                       |>
+  kable("html", caption=caption,
+        format.args=list(big.mark=bigMark))  |>
+  kable_styling(bootstrap_options=c("striped", "bordered", "condensed"),
+                position="left",
+                full_width=FALSE, ...)       |>
+  scroll_box(height = height, width = width) #  |>
+# as.character()                             |>      # Jupyter Only
+# display_html()                                      # Jupyter Only
+}
+```
+
+# Read election results
+
+Source is [2022 Kansas General Election Unoffical Results page](https://ent.sos.ks.gov/kssos_ent.html), Last and FINAL Update: 11/14/2022 6:18 PM
+
+County results screen scraped from SOS site.   
+
+```{r}
+results <-
+  read_xlsx("../County-Results-ent.sos.ks.gov-2022-11-14-1818-FINAL.xlsx",
+            guess_max = EXCEL_LIMIT)                    |>    #####
+  filter(str_detect(Contest, "Supreme Court Justice"))  |>
+  separate(Candidate, c("Name", "Retain"), sep = "-")   |>
+  select(-Contest,
+         -starts_with("State"), 
+         -CountyReport, 
+         -`County %`, 
+         -Precincts,
+         Votes = `County Votes`)                   |>
+  mutate(Retain = str_replace_all(Retain, '"', "") |>
+                  str_trim(),
+         Name   = str_trim(Name))                  |>
+  group_by(County, Name, Retain)                   |>
+  pivot_wider(names_from = "Retain",
+              values_from = Votes)                 |>
+  ungroup()                                        |>
+  mutate(Retain = YES > NO)
+
+dim(results)
+```          
+
+```{r}
+results |> Show(height = "400px")
+```     
+
+
+```{r}
+write_xlsx(results, 
+          paste0(FILE_PREFIX, "-County-Results-Judical-Retention.xlsx"))
+```
+
+```{r}
+countiesVotingNotToRetain <- 
+  results |> 
+    filter(!Retain)  
+
+dim(countiesVotingNotToRetain)
+```
+
+```{r}
+countiesVotingNotToRetain |>  Show(height = "400px")
+```
+
+
+```{r}
+write_xlsx(countiesVotingNotToRetain, 
+          paste0(FILE_PREFIX, "-Counties-Voting-Against-Judical-Retention.xlsx"))
+```
+
+```{r}
+justices <- countiesVotingNotToRetain$Name |> unique() |> sort()
+justices
+```
+
+```{r}
+countiesVotingNotToRetain                   |>
+  summarize(n         = n(),
+            nCounty   = n_distinct(County),
+            nJudtices = n_distinct(Name))    |>
+  Show()
+```
+
+# Example of defining map labels and colors
+
+Someday rework this old code originally used in 2010 and 2016
+
+```{r}
+justiceNoCounties <- 
+  countiesVotingNotToRetain  |>
+  filter(Name == justices[1])
+
+justiceNoCounties |> Show()
+```
+
+## Get list of county names and abbreviations 
+
+in FIPS order by county name
+
+```{r}
+m <- map('county', 'kansas', plot=FALSE)
+countyNames <- str_to_title( str_replace(m$names, "kansas,", "") )
+countyNames[57] <- "McPherson"   # Force this fix  for other matches 
+```
+
+```{r}
+countyNames
+```
+```{r}
+county.abbr
+```
+
+## Set default `Color` and `Labels` for each county
+
+```{r}
+Color  <- rep("white", 105)
+Labels <- rep("", 105)
+```
+
+```{r}
+notRetained <- countyNames %in% justiceNoCounties$County
+table(notRetained)
+```
+
+```{r}
+which(notRetained) 
+```
+
+```{r}
+Labels[notRetained] <- county.abbr[notRetained]
+Labels
+```
+
+```{r}
+Color[notRetained] <- rep("blue", sum(notRetained))
+Color
+```
+
+
+```{r example}
+m <- map('county', 'kansas', fill = TRUE, col = Color)
+  map.text("county","kansas",
+    labels = Labels, cex=1.15, add=TRUE, col="white")
+```
+
+# Map helper function
+
+```{r}
+plotNoCounties <- function (justiceNoCounties,
+                            MapTitle="Counties Voted NOT to Retain")
+{
+  m <- map('county', 'kansas', plot=FALSE)
+  countyNames <- str_to_title( str_replace(m$names, "kansas,", "") )
+  countyNames[57] <- "McPherson"   # Force this fix  for other matches
+  
+  Color  <- rep("white", 105)
+  Labels <- rep("", 105)
+  
+  notRetained <- countyNames %in% justiceNoCounties$County
+  
+  Color[notRetained]  <- rep("blue", sum(notRetained))
+  Labels[notRetained] <- county.abbr[notRetained]
+  
+  m <- map('county', 'kansas', fill = TRUE, col = Color)
+  
+  map.text("county","kansas",
+           labels = Labels, cex=1.15, 
+           add=TRUE, col = "white")
+  mtext(paste(sum(notRetained), MapTitle, justiceNoCounties$Name[1]), cex=1.5)
+
+  mtext(paste0("Source:  Kansas Secretary of State, Nov 8, 2022 General Election\n",  #####
+               "Final Unofficial Online Election Results, Nov 14, 2022"),             #####
+    BOTTOM<-1, adj=0, line=0.5, cex=0.75)
+  
+  mtext("watchdogLab.substack.com", 1, adj=1, line=0.5, col="blue")                            
+}                        
+```
+
+
+# Map for each justice losing one or more counties
+
+```{r justice}
+for (iJustice in 1:length(justices))
+{
+  plotNoCounties(countiesVotingNotToRetain  |>
+               filter(Name == justices[iJustice]))     
+}
+```
+
+
+# Epilog {.tabset .tabset-fade .tabset-pills}
+
+## {.active}
+
+## Session Info
+
+```{r devtoolsSessionInfo}
+devtools::session_info()
+```
+
+</div>
+
+```{r epilogDeltaTime, echo=FALSE}
+time.2 <- Sys.time()
+processingTime <- paste("Processing time:", sprintf("%.1f",
+                        as.numeric(difftime(time.2,
+                                            time.1, units="secs"))), "secs\n")
+```
+
+`r processingTime`
+`r format(time.2, "%Y-%m-%d %H%M")`
+
